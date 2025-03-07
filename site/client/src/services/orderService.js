@@ -2,7 +2,6 @@ import api, { getCsrfToken } from './api';
 
 export const createOrder = async (orderData) => {
   try {
-    // Get CSRF token for state-changing operation
     const csrfToken = await getCsrfToken();
     
     const response = await api.post(

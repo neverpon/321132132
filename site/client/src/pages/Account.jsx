@@ -3,10 +3,9 @@ import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { User, Package, ShoppingBag, CreditCard, Settings, Lock } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { getUserOrders } from '../services/orderService';
-import { useToast } from '../hooks/useToast';
+import { getUserOrders } from "../services/orderService";
+import { useToast } from "../hooks/useToast";
 
-// Account Dashboard
 const Dashboard = () => {
   const { currentUser } = useAuth();
   const [recentOrders, setRecentOrders] = useState([]);
