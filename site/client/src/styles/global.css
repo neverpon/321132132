@@ -9,7 +9,12 @@
   }
   
   body {
-    @apply bg-gray-50 text-gray-900 min-h-screen;
+    @apply bg-gray-50 text-gray-900 min-h-screen transition-colors duration-300;
+  }
+  
+  /* Dark mode styles */
+  .dark body {
+    @apply bg-gray-900 text-gray-100;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -35,11 +40,24 @@
   :focus-visible {
     @apply outline-none ring-2 ring-primary ring-offset-2;
   }
+  
+  .dark :focus-visible {
+    @apply ring-offset-gray-900;
+  }
+  
+  /* Smooth transitions for dark mode */
+  .transition-theme {
+    @apply transition-colors duration-300;
+  }
 }
 
 @layer components {
   .btn {
     @apply inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  
+  .dark .btn {
+    @apply ring-offset-gray-900;
   }
   
   .btn-primary {
@@ -54,20 +72,42 @@
     @apply border-2 border-primary text-primary hover:bg-primary hover:text-white focus:ring-primary;
   }
   
+  .dark .btn-outline {
+    @apply text-primary-light border-primary-light hover:bg-primary-light/20 hover:text-white;
+  }
+  
   .btn-ghost {
     @apply text-primary hover:bg-primary-light/10;
+  }
+  
+  .dark .btn-ghost {
+    @apply text-primary-light hover:bg-primary-light/5;
   }
   
   .card {
     @apply bg-white rounded-xl shadow-card transition duration-300 hover:shadow-card-hover;
   }
   
+  .dark .card {
+    @apply bg-gray-800 shadow-none border border-gray-700;
+  }
+  
   .input {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary;
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg 
+    focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary 
+    transition-colors;
+  }
+  
+  .dark .input {
+    @apply bg-gray-800 text-white border-gray-700;
   }
   
   .label {
     @apply block mb-2 font-medium text-gray-700;
+  }
+  
+  .dark .label {
+    @apply text-gray-300;
   }
   
   .badge {
@@ -78,7 +118,45 @@
     @apply bg-primary-light/20 text-primary;
   }
   
+  .dark .badge-primary {
+    @apply bg-primary-light/10 text-primary-light;
+  }
+  
   .badge-secondary {
     @apply bg-secondary-light/20 text-secondary;
+  }
+  
+  .dark .badge-secondary {
+    @apply bg-secondary-light/10 text-secondary-light;
+  }
+  
+  /* Animation classes */
+  .animate-fade-in {
+    @apply animate-[fadeIn_0.5s_ease-in-out];
+  }
+  
+  .animate-slide-in {
+    @apply animate-[slideIn_0.3s_ease-out];
+  }
+  
+  .animate-slide-up {
+    @apply animate-[slideUp_0.4s_ease-out];
+  }
+  
+  /* Dropdown animations */
+  .dropdown-enter {
+    @apply opacity-0 transform -translate-y-2;
+  }
+  
+  .dropdown-enter-active {
+    @apply opacity-100 transform translate-y-0 transition duration-200;
+  }
+  
+  .dropdown-exit {
+    @apply opacity-100 transform translate-y-0;
+  }
+  
+  .dropdown-exit-active {
+    @apply opacity-0 transform -translate-y-2 transition duration-150;
   }
 }

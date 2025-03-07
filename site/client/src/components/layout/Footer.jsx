@@ -1,75 +1,291 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Search, ShoppingCart, User, Menu, X, Heart } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
+import { useCart } from '../../hooks/useCart';
+import ThemeToggle from '../ui/ThemeToggle';
 
-const Footer = () => {
+const Header = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+  const { currentUser, isAuthenticated, logoutUser } = useAuth();
+  const { toggleCart, totalItems } = useCart();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  const userDropdownRef = useRef(null);
+  const categoryDropdownRef = useRef(null);
+  
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
+        setIsUserDropdownOpen(false);
+      }
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target)) {
+        setIsCategoryDropdownOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+  
+  // Reset search and close menu when location changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location]);
+  
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
+    }
+  };
+  
+  const toggleUserDropdown = () => {
+    setIsUserDropdownOpen(!isUserDropdownOpen);
+  };
+  
+  const toggleCategoryDropdown = () => {
+    setIsCategoryDropdownOpen(!isCategoryDropdownOpen);
+  };
+  
+  // Categories
+  const categories = [
+    { name: 'Computer Vision', slug: 'computer-vision' },
+    { name: 'Natural Language', slug: 'natural-language' },
+    { name: 'Audio Processing', slug: 'audio-processing' },
+    { name: 'Forecasting', slug: 'forecasting' }
+  ];
+  
   return (
-    <footer className="bg-gray-900 text-white pt-12 pb-6">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          <div>
-            <div className="text-2xl font-bold mb-4 flex items-center">
-              <span className="mr-2 text-3xl">🧠</span>
-              AI Butik
-            </div>
-            <p className="text-gray-400 mb-4">Your premier marketplace for cutting-edge neural networks and AI solutions.</p>
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition">
-                <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385h-3.047v-3.47h3.047v-2.642c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953h-1.514c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385c5.737-.9 10.125-5.864 10.125-11.854z"/></svg>
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition">
-                <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723 10.053 10.053 0 01-3.127 1.184 4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.937 4.937 0 004.604 3.417 9.868 9.868 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63a9.936 9.936 0 002.46-2.548l-.047-.02z"/></svg>
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition">
-                <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-              </a>
-            </div>
+    <header className="bg-white dark:bg-dark-bg shadow-md transition-colors duration-300">
+      {/* Top Bar */}
+      <div className="bg-primary text-white py-2">
+        <div className="container mx-auto px-4 flex justify-between items-center">
+          <div className="flex items-center space-x-4">
+            <span className="text-sm">Support: info@aibutik.com</span>
+            <span className="text-sm">|</span>
+            <span className="text-sm">+1 (555) 123-4567</span>
           </div>
-          
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2">
-              <li><Link to="/" className="text-gray-400 hover:text-white transition">Home</Link></li>
-              <li><Link to="/products" className="text-gray-400 hover:text-white transition">Products</Link></li>
-              <li><Link to="/products" className="text-gray-400 hover:text-white transition">Categories</Link></li>
-              <li><Link to="/news" className="text-gray-400 hover:text-white transition">News</Link></li>
-              <li><Link to="/contact" className="text-gray-400 hover:text-white transition">Contact</Link></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Support</h3>
-            <ul className="space-y-2">
-              <li><a href="#" className="text-gray-400 hover:text-white transition">Help Center</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition">Documentation</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition">API Reference</a></li>
-              <li><Link to="/contact" className="text-gray-400 hover:text-white transition">Contact Us</Link></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition">System Status</a></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Legal</h3>
-            <ul className="space-y-2">
-              <li><a href="#" className="text-gray-400 hover:text-white transition">Terms of Service</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition">Privacy Policy</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition">Refund Policy</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition">License Agreement</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition">Security</a></li>
-            </ul>
-          </div>
-        </div>
-        
-        <div className="border-t border-gray-800 pt-6 mt-6">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">&copy; {new Date().getFullYear()} AI Butik. All rights reserved.</p>
-            <div className="mt-4 md:mt-0">
-              <p className="text-gray-400 text-sm">Designed and developed with ❤️ for AI enthusiasts</p>
-            </div>
+          <div className="flex items-center space-x-4">
+            <a href="#" className="text-sm hover:text-primary-light transition">Help Center</a>
+            <a href="#" className="text-sm hover:text-primary-light transition">Track Order</a>
+            <ThemeToggle />
           </div>
         </div>
       </div>
-    </footer>
+      
+      {/* Main Navigation */}
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex justify-between items-center">
+          {/* Logo */}
+          <div className="flex items-center">
+            <Link to="/" className="text-2xl font-bold text-primary flex items-center">
+              <span className="mr-2 text-3xl">🧠</span>
+              AI Butik
+            </Link>
+          </div>
+          
+          {/* Search Bar */}
+          <div className="hidden md:flex flex-1 max-w-lg mx-8">
+            <form onSubmit={handleSearch} className="relative w-full">
+              <input 
+                type="text" 
+                placeholder="Search for AI models..." 
+                className="w-full py-2 px-4 pl-10 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:text-gray-200 transition-colors"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+              <button type="submit" className="sr-only">Search</button>
+            </form>
+          </div>
+          
+          {/* Navigation Actions */}
+          <div className="flex items-center space-x-4">
+            <button className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+              <Heart size={22} className="text-gray-600 dark:text-gray-300" />
+              <span className="absolute top-0 right-0 bg-primary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span>
+            </button>
+            
+            <button 
+              className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              onClick={toggleCart}
+            >
+              <ShoppingCart size={22} className="text-gray-600 dark:text-gray-300" />
+              <span className="absolute top-0 right-0 bg-primary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">{totalItems}</span>
+            </button>
+            
+            {isAuthenticated ? (
+              <div className="relative group" ref={userDropdownRef}>
+                <button 
+                  className="hidden md:flex items-center space-x-1 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  onClick={toggleUserDropdown}
+                >
+                  <User size={22} className="text-gray-600 dark:text-gray-300" />
+                  <span className="text-gray-700 dark:text-gray-300">{currentUser.username}</span>
+                </button>
+                <div className={`absolute right-0 mt-2 w-48 bg-white dark:bg-dark-card shadow-lg rounded-lg p-2 z-10 transition-all duration-200 ${isUserDropdownOpen ? 'opacity-100 transform-none' : 'opacity-0 pointer-events-none -translate-y-2'}`}>
+                  <Link to="/account" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-primary-light/10 dark:hover:bg-gray-700 rounded transition-colors">My Account</Link>
+                  <Link to="/account/orders" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-primary-light/10 dark:hover:bg-gray-700 rounded transition-colors">My Orders</Link>
+                  {currentUser.isAdmin && (
+                    <Link to="/admin" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-primary-light/10 dark:hover:bg-gray-700 rounded transition-colors">Admin Panel</Link>
+                  )}
+                  <hr className="my-1 dark:border-gray-700" />
+                  <button
+                    onClick={logoutUser}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-primary-light/10 dark:hover:bg-gray-700 rounded transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="hidden md:flex space-x-2">
+                <Link to="/login" className="px-4 py-2 text-sm text-primary hover:bg-primary-light/10 dark:hover:bg-gray-700 rounded-lg transition-colors">Login</Link>
+                <Link to="/register" className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">Register</Link>
+              </div>
+            )}
+            
+            <button 
+              className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? (
+                <X size={24} className="text-gray-600 dark:text-gray-300" />
+              ) : (
+                <Menu size={24} className="text-gray-600 dark:text-gray-300" />
+              )}
+            </button>
+          </div>
+        </div>
+        
+        {/* Category Navigation */}
+        <div className="hidden md:flex mt-4 border-t dark:border-gray-700 pt-3">
+          <nav className="w-full">
+            <ul className="flex space-x-8">
+              <li>
+                <Link 
+                  to="/" 
+                  className={`${location.pathname === '/' ? 'text-primary font-medium' : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary'} transition-colors`}
+                >
+                  Home
+                </Link>
+              </li>
+              <li className="relative" ref={categoryDropdownRef}>
+                <button
+                  onClick={toggleCategoryDropdown}
+                  className="flex items-center text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors"
+                >
+                  Categories
+                </button>
+                <div className={`absolute left-0 mt-2 w-48 bg-white dark:bg-dark-card shadow-lg rounded-lg p-2 z-10 transition-all duration-200 ${isCategoryDropdownOpen ? 'opacity-100 transform-none' : 'opacity-0 pointer-events-none -translate-y-2'}`}>
+                  {categories.map(category => (
+                    <Link 
+                      key={category.slug} 
+                      to={`/products?category=${category.slug}`} 
+                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-primary-light/10 dark:hover:bg-gray-700 rounded transition-colors"
+                    >
+                      {category.name}
+                    </Link>
+                  ))}
+                </div>
+              </li>
+              <li>
+                <Link 
+                  to="/products" 
+                  className={`${location.pathname === '/products' ? 'text-primary font-medium' : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary'} transition-colors`}
+                >
+                  Products
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/news" 
+                  className={`${location.pathname === '/news' ? 'text-primary font-medium' : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary'} transition-colors`}
+                >
+                  News
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/contact" 
+                  className={`${location.pathname === '/contact' ? 'text-primary font-medium' : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary'} transition-colors`}
+                >
+                  Contact
+                </Link>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+      
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="md:hidden bg-white dark:bg-dark-bg p-4 border-t dark:border-gray-700 animate-slide-in">
+          <div className="mb-4">
+            <form onSubmit={handleSearch}>
+              <input 
+                type="text" 
+                placeholder="Search for AI models..." 
+                className="w-full py-2 px-4 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-dark-card dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button type="submit" className="sr-only">Search</button>
+            </form>
+          </div>
+          <nav>
+            <ul className="space-y-2">
+              <li><Link to="/" className="block p-2 rounded text-primary font-medium">Home</Link></li>
+              <li><Link to="/products" className="block p-2 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Products</Link></li>
+              {categories.map(category => (
+                <li key={category.slug}>
+                  <Link 
+                    to={`/products?category=${category.slug}`} 
+                    className="block p-2 pl-4 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    {category.name}
+                  </Link>
+                </li>
+              ))}
+              <li><Link to="/news" className="block p-2 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">News</Link></li>
+              <li><Link to="/contact" className="block p-2 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Contact</Link></li>
+              <li><hr className="my-2 dark:border-gray-700" /></li>
+              {isAuthenticated ? (
+                <>
+                  <li><Link to="/account" className="block p-2 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">My Account</Link></li>
+                  <li><Link to="/account/orders" className="block p-2 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">My Orders</Link></li>
+                  {currentUser.isAdmin && (
+                    <li><Link to="/admin" className="block p-2 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Admin Panel</Link></li>
+                  )}
+                  <li>
+                    <button
+                      onClick={logoutUser}
+                      className="block w-full text-left p-2 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      Logout
+                    </button>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li><Link to="/login" className="block p-2 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Login</Link></li>
+                  <li><Link to="/register" className="block p-2 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Register</Link></li>
+                </>
+              )}
+            </ul>
+          </nav>
+        </div>
+      )}
+    </header>
   );
 };
 
-export default Footer;
+export default Header;

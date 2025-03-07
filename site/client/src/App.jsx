@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { ToastProvider } from './context/ToastContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
 import Products from './pages/Products';
@@ -21,7 +22,6 @@ import AdminProducts from './pages/Admin/Products';
 import AdminOrders from './pages/Admin/Orders';
 import AdminUsers from './pages/Admin/Users';
 
-// Компонент ErrorBoundary для отлова ошибок рендеринга
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -33,20 +33,32 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error("Ошибка рендеринга:", error, errorInfo);
+    console.error("Rendering error:", error, errorInfo);
     this.setState({ error, errorInfo });
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: '20px', backgroundColor: '#ffebee', border: '1px solid #f44336', borderRadius: '4px' }}>
-          <h2>Что-то пошло не так</h2>
-          <details style={{ whiteSpace: 'pre-wrap' }}>
-            <summary>Подробности ошибки</summary>
-            {this.state.error && this.state.error.toString()}
-            <br />
-            {this.state.errorInfo && this.state.errorInfo.componentStack}
+        <div className="p-6 bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-lg m-4">
+          <h2 className="text-xl font-bold text-red-800 dark:text-red-400 mb-2">Something went wrong</h2>
+          <p className="text-red-600 dark:text-red-300 mb-4">We're sorry for the inconvenience. Please try refreshing the page.</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+          >
+            Refresh Page
+          </button>
+          <details className="mt-4 p-2 bg-red-100 dark:bg-red-900/40 rounded-lg">
+            <summary className="cursor-pointer text-red-800 dark:text-red-300 font-medium">Error details</summary>
+            <div className="mt-2 p-2 bg-white dark:bg-gray-800 rounded overflow-auto max-h-60 text-sm">
+              <p className="font-mono text-red-600 dark:text-red-400 whitespace-pre-wrap">
+                {this.state.error && this.state.error.toString()}
+              </p>
+              <p className="font-mono text-gray-600 dark:text-gray-400 whitespace-pre-wrap mt-2">
+                {this.state.errorInfo && this.state.errorInfo.componentStack}
+              </p>
+            </div>
           </details>
         </div>
       );
@@ -56,61 +68,52 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// Компонент для отладки загрузки контекстов
-const DebugProvider = ({ context: Context, children, name }) => {
-  useEffect(() => {
-    console.log(`${name} контекст загружен`);
-    return () => console.log(`${name} контекст размонтирован`);
-  }, [name]);
-
-  return <Context>{children}</Context>;
-};
-
 function App() {
   const [isRouterMounted, setIsRouterMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Логирование монтирования приложения
   useEffect(() => {
-    console.log("Приложение инициализировано");
+    console.log("Application initialized");
     
-    // Проверка доступности ключевых зависимостей
-    console.log("React Router доступен:", !!Router);
-    console.log("React доступен:", !!React);
+    console.log("React Router available:", !!Router);
+    console.log("React available:", !!React);
     
-    // Имитация задержки для проверки загрузки
     setTimeout(() => {
       setIsRouterMounted(true);
       setIsLoading(false);
-      console.log("Монтирование роутера после проверки");
     }, 100);
 
-    // Добавляем обработчик для отслеживания ошибок JavaScript
     const handleError = (event) => {
-      console.error("Глобальная ошибка JavaScript:", event.error);
+      console.error("Global JavaScript error:", event.error);
     };
     
     window.addEventListener('error', handleError);
     
     return () => {
       window.removeEventListener('error', handleError);
-      console.log("Приложение размонтировано");
+      console.log("Application unmounted");
     };
   }, []);
 
-  // Отображение состояния загрузки
   if (isLoading) {
-    return <div style={{ padding: '20px' }}>Загрузка приложения...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading application...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <ErrorBoundary>
       {isRouterMounted ? (
         <Router>
-          <DebugProvider context={AuthProvider} name="Auth">
-            <DebugProvider context={CartProvider} name="Cart">
-              <DebugProvider context={ToastProvider} name="Toast">
-                <div id="app-debug-container">
+          <ThemeProvider>
+            <AuthProvider>
+              <CartProvider>
+                <ToastProvider>
                   <Routes>
                     {/* Public routes */}
                     <Route path="/" element={
@@ -211,13 +214,15 @@ function App() {
                       } />
                     </Route>
                   </Routes>
-                </div>
-              </DebugProvider>
-            </DebugProvider>
-          </DebugProvider>
+                </ToastProvider>
+              </CartProvider>
+            </AuthProvider>
+          </ThemeProvider>
         </Router>
       ) : (
-        <div>Ошибка инициализации роутера</div>
+        <div className="p-4 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-lg">
+          Error initializing router. Please refresh the page.
+        </div>
       )}
     </ErrorBoundary>
   );
