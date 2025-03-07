@@ -38,7 +38,6 @@ router.post(
   register
 );
 
-// Login user
 router.post(
   '/login',
   validate([

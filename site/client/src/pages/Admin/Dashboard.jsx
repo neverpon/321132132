@@ -8,7 +8,7 @@ import {
   ArrowUpRight, 
   ArrowDownRight 
 } from 'lucide-react';
-import { getUserStats, getOrderStats } from '../../services/adminService';
+import { getUserDetailsAdmin, getOrderDetailsAdmin } from '../../services/adminService';
 import { useToast } from '../../hooks/useToast';
 
 const Dashboard = () => {
@@ -21,8 +21,8 @@ const Dashboard = () => {
     const fetchStats = async () => {
       try {
         const [userStatsData, orderStatsData] = await Promise.all([
-          getUserStats(),
-          getOrderStats()
+          getUserDetailsAdmin(),
+          getOrderDetailsAdmin()
         ]);
         
         setUserStats(userStatsData);

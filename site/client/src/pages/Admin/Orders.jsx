@@ -10,7 +10,7 @@ import {
   Eye,
   RefreshCw
 } from 'lucide-react';
-import { getAllOrders, updateOrderStatus } from '../../services/adminService';
+import { getAllOrdersAdmin, updateOrderAdmin } from '../../services/adminService';
 import { useToast } from '../../hooks/useToast';
 
 const Orders = () => {
@@ -37,7 +37,7 @@ const Orders = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const response = await getAllOrders({
+      const response = await getAllOrdersAdmin({
         page: currentPage,
         limit: 10,
         status: statusFilter,
@@ -97,7 +97,7 @@ const Orders = () => {
     if (!selectedOrder || !newStatus) return;
 
     try {
-      await updateOrderStatus(selectedOrder.id, { status: newStatus });
+      await updateOrderAdmin(selectedOrder.id, { status: newStatus });
       success('Order status updated successfully');
       
       // Update the order in the list

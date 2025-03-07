@@ -12,7 +12,7 @@ import {
   Calendar,
   DollarSign
 } from 'lucide-react';
-import { getAllUsers } from '../../services/adminService';
+import { getAllUsersAdmin } from '../../services/adminService';
 import { useToast } from '../../hooks/useToast';
 
 const Users = () => {
@@ -33,7 +33,7 @@ const Users = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await getAllUsers({
+      const response = await getAllUsersAdmin({
         page: currentPage,
         limit: 10,
         role: roleFilter,
